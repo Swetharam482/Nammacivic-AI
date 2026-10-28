@@ -31,11 +31,14 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
-    # File Uploads
-    UPLOAD_DIR: Path = BASE_DIR / "uploads"
-    MAX_FILE_SIZE_MB: int = 5
-    ALLOWED_EXTENSIONS: List[str] = ["jpg", "jpeg", "png", "webp", "pdf"]
-
+   # File Uploads
+UPLOAD_DIR: Path = (
+    Path("/tmp/uploads")
+    if os.getenv("VERCEL")
+    else BASE_DIR / "uploads"
+)
+MAX_FILE_SIZE_MB: int = 5
+ALLOWED_EXTENSIONS: List[str] = ["jpg", "jpeg", "png", "webp", "pdf"]
     # AI Config
     AI_PROVIDER: str = "fallback"  # "fallback", "gemini", "openai"
     GEMINI_API_KEY: str = ""
