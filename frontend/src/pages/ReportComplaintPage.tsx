@@ -112,8 +112,21 @@ export const ReportComplaintPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
 
-  // Address Verification States: 'IDLE' | 'VERIFYING' | 'VERIFIED' | 'PARTIALLY_MATCHED' | 'NOT_FOUND' | 'AMBIGUOUS' | 'PROVIDER_UNAVAILABLE'
-  const [verifyStatus, setVerifyStatus] = useState<string>('IDLE');
+  // Address Verification States
+  type VerificationStatus = 
+    | 'IDLE' 
+    | 'VERIFYING' 
+    | 'NOT_VERIFIED' 
+    | 'NEEDS_CONFIRMATION' 
+    | 'VERIFIED' 
+    | 'MANUAL_CONFIRMED' 
+    | 'FAILED' 
+    | 'PARTIALLY_MATCHED' 
+    | 'NOT_FOUND' 
+    | 'AMBIGUOUS' 
+    | 'PROVIDER_UNAVAILABLE';
+
+  const [verifyStatus, setVerifyStatus] = useState<VerificationStatus>('IDLE');
   const [verifyMessage, setVerifyMessage] = useState<string>('');
   const [candidates, setCandidates] = useState<AddressCandidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<AddressCandidate | null>(null);
@@ -220,12 +233,25 @@ export const ReportComplaintPage: React.FC = () => {
   const handleMapLocationChange = (
     coords: { lat: number; lng: number },
     address: string,
-    newStatus: 'VERIFIED' | 'MANUAL_CONFIRMED'
+    newStatus: 'VERIFIED' | 'MANUAL_CONFIRMED' | 'NEEDS_CONFIRMATION' | 'NOT_VERIFIED' | 'FAILED'
   ) => {
     setVerifiedCoords(coords);
     setVerifiedDisplayAddress(address);
     setVerifyStatus(newStatus);
-    setErrorMessage('');
+    
+    if (newStatus === 'VERIFIED') {
+      setVerifyMessage('Address successfully verified.');
+      setErrorMessage('');
+    } else if (newStatus === 'MANUAL_CONFIRMED') {
+      setVerifyMessage('Grievance location manually confirmed on map.');
+      setErrorMessage('');
+    } else if (newStatus === 'NEEDS_CONFIRMATION') {
+      setVerifyMessage('Location modified. Please click "Confirm Location" on the map to confirm.');
+    } else if (newStatus === 'NOT_VERIFIED') {
+      setVerifyMessage('Address not verified yet.');
+    } else if (newStatus === 'FAILED') {
+      setVerifyMessage('Could not verify location. Please pin your location manually on the map.');
+    }
   };
 
   const handleSelectCandidate = (cand: AddressCandidate) => {
