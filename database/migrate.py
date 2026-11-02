@@ -34,6 +34,11 @@ MIGRATIONS = [
         "version": "002_add_geocoding_columns",
         "description": "Ensure spatial geocoding columns (latitude, longitude, geocoded_address) exist on complaints",
         "up": lambda conn: _add_geocoding_columns(conn)
+    },
+    {
+        "version": "003_add_address_verification_and_reset_tokens",
+        "description": "Add address_verification_status to complaints, user_id to sessions, and password_reset_tokens table",
+        "up": lambda conn: _migration_003(conn)
     }
 ]
 
@@ -47,6 +52,35 @@ def _add_geocoding_columns(conn):
             conn.execute(text("ALTER TABLE complaints ADD COLUMN longitude FLOAT"))
         if "geocoded_address" not in cols:
             conn.execute(text("ALTER TABLE complaints ADD COLUMN geocoded_address VARCHAR(500)"))
+
+def _migration_003(conn):
+    inspector = inspect(conn)
+    tables = inspector.get_table_names()
+
+    # 1. Update complaints
+    if "complaints" in tables:
+        cols = [c["name"] for c in inspector.get_columns("complaints")]
+        if "address_verification_status" not in cols:
+            conn.execute(text("ALTER TABLE complaints ADD COLUMN address_verification_status VARCHAR(50) DEFAULT 'UNVERIFIED'"))
+
+    # 2. Update conversation_sessions
+    if "conversation_sessions" in tables:
+        cols = [c["name"] for c in inspector.get_columns("conversation_sessions")]
+        if "user_id" not in cols:
+            conn.execute(text("ALTER TABLE conversation_sessions ADD COLUMN user_id INTEGER"))
+
+    # 3. Create password_reset_tokens
+    if "password_reset_tokens" not in tables:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                token_hash VARCHAR(255) UNIQUE NOT NULL,
+                expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                is_used BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
 
 def ensure_migration_table(conn):
     conn.execute(text("""
@@ -106,4 +140,3 @@ if __name__ == "__main__":
         show_status()
     else:
         run_migrations()
-

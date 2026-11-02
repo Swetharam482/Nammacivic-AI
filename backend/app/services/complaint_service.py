@@ -13,15 +13,32 @@ from app.services.duplicate_service import duplicate_service
 from app.ai.rule_fallback import assess_priority
 
 CATEGORY_DEPARTMENT_CODES = {
+    "ROAD_DAMAGE": "ROADS",
+    "ROAD": "ROADS",
     "STREETLIGHT": "ELEC",
     "GARBAGE": "SWM",
-    "SANITATION": "SWM",
-    "WATER": "CMWSSB",
     "DRAINAGE": "CMWSSB",
-    "ROAD": "ROADS",
-    "PUBLIC_PROPERTY": "GEN",
-    "ENVIRONMENT": "GEN",
+    "SEWAGE": "CMWSSB",
+    "WATER_SHORTAGE": "CMWSSB",
+    "WATER_LEAK": "CMWSSB",
+    "WATER": "CMWSSB",
+    "PUBLIC_TOILET": "SWM",
+    "SANITATION": "SWM",
+    "MOSQUITO": "VET",
+    "STRAY_ANIMAL": "VET",
     "ANIMAL": "VET",
+    "ENCROACHMENT": "GEN",
+    "ILLEGAL_DUMPING": "SWM",
+    "FLOODING": "CMWSSB",
+    "PUBLIC_INFRA": "GEN",
+    "PUBLIC_PROPERTY": "GEN",
+    "PARK": "GEN",
+    "TREE_HAZARD": "GEN",
+    "ENVIRONMENT": "GEN",
+    "FOOTPATH": "ROADS",
+    "PUBLIC_SAFETY": "GEN",
+    "WATER_QUALITY": "CMWSSB",
+    "OTHER_CIVIC": "GEN",
     "OTHER": "GEN"
 }
 
@@ -117,7 +134,8 @@ class ComplaintService:
                     related_complaint_id=related_id,
                     latitude=complaint_in.latitude,
                     longitude=complaint_in.longitude,
-                    geocoded_address=complaint_in.geocoded_address
+                    geocoded_address=complaint_in.geocoded_address,
+                    address_verification_status=complaint_in.address_verification_status or ("VERIFIED" if complaint_in.latitude and complaint_in.longitude else "NEEDS_CONFIRMATION")
                 )
                 db.add(complaint)
                 db.flush()

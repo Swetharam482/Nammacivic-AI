@@ -6,8 +6,8 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (data: { email: string; password: string }) => Promise<void>;
-  register: (data: { email: string; full_name: string; phone_number?: string; password: string }) => Promise<void>;
+  login: (data: { email: string; password: string }) => Promise<User>;
+  register: (data: { email: string; full_name: string; phone_number?: string; password: string }) => Promise<User>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -41,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('nammacivic_token', res.access_token);
     setToken(res.access_token);
     setUser(res.user);
+    return res.user;
   };
 
   const register = async (data: { email: string; full_name: string; phone_number?: string; password: string }) => {
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('nammacivic_token', res.access_token);
     setToken(res.access_token);
     setUser(res.user);
+    return res.user;
   };
 
   const logout = () => {

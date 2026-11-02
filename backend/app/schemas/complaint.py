@@ -60,6 +60,7 @@ class ComplaintCreate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     geocoded_address: Optional[str] = None
+    address_verification_status: Optional[str] = "NEEDS_CONFIRMATION"
 
 class ComplaintListItem(BaseModel):
     id: int
@@ -77,6 +78,7 @@ class ComplaintListItem(BaseModel):
     updated_at: datetime
     department_name: Optional[str] = None
     is_citizen_verified: bool = False
+    address_verification_status: Optional[str] = "UNVERIFIED"
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -111,6 +113,7 @@ class ComplaintResponse(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     geocoded_address: Optional[str] = None
+    address_verification_status: Optional[str] = "NEEDS_CONFIRMATION"
     created_at: datetime
     updated_at: datetime
     status_history: List[StatusHistoryResponse] = Field(default_factory=list)

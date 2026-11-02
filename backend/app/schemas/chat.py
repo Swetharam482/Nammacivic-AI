@@ -11,9 +11,16 @@ class ComplaintDraftState(BaseModel):
     priority: Optional[str] = "MEDIUM"
     priority_reason: Optional[str] = None
     language: Optional[str] = "English"
+    suggested_department: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    geocoded_address: Optional[str] = None
+    address_verification_status: Optional[str] = None
     missing_information: List[str] = Field(default_factory=list)
     needs_confirmation: bool = False
     is_ready_to_submit: bool = False
+
+    model_config = {"extra": "ignore"}
 
 class ChatMessageRequest(BaseModel):
     session_id: Optional[str] = None
@@ -32,3 +39,10 @@ class ResetChatResponse(BaseModel):
     session_id: str
     message: str
     draft: ComplaintDraftState
+
+class ChatConfirmSubmissionRequest(BaseModel):
+    session_id: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    geocoded_address: Optional[str] = None
+    address_verification_status: Optional[str] = "VERIFIED"

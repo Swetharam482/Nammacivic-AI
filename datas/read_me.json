@@ -1,0 +1,50 @@
+[
+  {
+    "Topic": "Dataset Name",
+    "topic": "Dataset Name",
+    "Details": "NammaCivic AI 1000 Grievance Redressal Knowledge Dataset",
+    "details": "NammaCivic AI 1000 Grievance Redressal Knowledge Dataset"
+  },
+  {
+    "Topic": "Version",
+    "topic": "Version",
+    "Details": "2.0 (1000+ Multi-lingual Utterances)",
+    "details": "2.0 (1000+ Multi-lingual Utterances)"
+  },
+  {
+    "Topic": "Author",
+    "topic": "Author",
+    "Details": "NammaCivic AI Academic Engineering Team",
+    "details": "NammaCivic AI Academic Engineering Team"
+  },
+  {
+    "Topic": "Scope",
+    "topic": "Scope",
+    "Details": "Tamil Nadu Local Body Civic Redressal Multi-lingual Grounding",
+    "details": "Tamil Nadu Local Body Civic Redressal Multi-lingual Grounding"
+  },
+  {
+    "Topic": "Languages",
+    "topic": "Languages",
+    "Details": "English, Tamil (தமிழ்), Tanglish (Tamil in Roman Script)",
+    "details": "English, Tamil (தமிழ்), Tanglish (Tamil in Roman Script)"
+  },
+  {
+    "Topic": "Categories",
+    "topic": "Categories",
+    "Details": "20 Official Municipal Grievance Categories",
+    "details": "20 Official Municipal Grievance Categories"
+  },
+  {
+    "Topic": "Total Examples",
+    "topic": "Total Examples",
+    "Details": "1020 Synthetic Grievance Utterances + 40 Multi-turn Dialogues",
+    "details": "1020 Synthetic Grievance Utterances + 40 Multi-turn Dialogues"
+  },
+  {
+    "Topic": "Synthetic Notice",
+    "topic": "Synthetic Notice",
+    "Details": "All data in this workbook is 100% synthetically created for testing, dataset-grounded retrieval, classification, and benchmark validation. No real confidential citizen or government records are represented.",
+    "details": "All data in this workbook is 100% synthetically created for testing, dataset-grounded retrieval, classification, and benchmark validation. No real confidential citizen or government records are represented."
+  }
+]

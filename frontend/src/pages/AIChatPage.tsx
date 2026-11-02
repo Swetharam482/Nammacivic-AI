@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Bot, 
   Mic, 
@@ -28,7 +28,8 @@ import { ChatMessage, ComplaintDraftState, GeocodeMatch } from '../types';
 
 export const AIChatPage: React.FC = () => {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const { t, language, savedDraft, clearDraft } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [sessionId, setSessionId] = useState<string>('');
@@ -44,6 +45,7 @@ export const AIChatPage: React.FC = () => {
     is_ready_to_submit: false
   });
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
+  const draftSeededRef = useRef(false);
 
   // OpenStreetMap Nominatim Geocoding State (Free, No Google Maps API key required)
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -77,6 +79,22 @@ export const AIChatPage: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading, interimText]);
+
+  useEffect(() => {
+    if (!draftSeededRef.current && searchParams.get('fromDraft') === '1' && savedDraft.description) {
+      draftSeededRef.current = true;
+      const seedMsg = [
+        savedDraft.description,
+        savedDraft.location ? `at ${savedDraft.location}` : '',
+        savedDraft.landmark ? `near ${savedDraft.landmark}` : '',
+        savedDraft.duration ? `for ${savedDraft.duration}` : ''
+      ].filter(Boolean).join(' ');
+
+      setTimeout(() => {
+        handleSendMessage(seedMsg);
+      }, 350);
+    }
+  }, [searchParams, savedDraft]);
 
   // Handle sending a message
   const handleSendMessage = async (textToSend: string) => {
@@ -150,7 +168,8 @@ export const AIChatPage: React.FC = () => {
           if (isFinal) {
             setIsListening(false);
             setInterimText('');
-            handleSendMessage(transcript);
+            // Show recognized text in input field for citizen review and editing before sending
+            setInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
           } else {
             setInterimText(transcript);
           }
@@ -214,11 +233,36 @@ export const AIChatPage: React.FC = () => {
     setGeocodeMatches([]);
 
     try {
-      const res = await api.searchAddress(target.trim());
-      setGeocodeMatches(res.matches || []);
-      setGeocodeStatus(res.status);
+      const verified = await api.verifyAddress(target.trim(), draft.landmark);
+      if (verified.status === 'VERIFIED' && verified.latitude && verified.longitude) {
+        const match: GeocodeMatch = {
+          display_address: verified.matched_address || target,
+          latitude: verified.latitude,
+          longitude: verified.longitude
+        };
+        handleConfirmLocationMatch(match);
+        setGeocodeStatus('verified');
+      } else if (verified.candidates && verified.candidates.length > 0) {
+        setGeocodeMatches(verified.candidates.map(c => ({
+          display_address: c.display_address || c.display_name || '',
+          latitude: c.latitude,
+          longitude: c.longitude,
+          place_id: c.place_id
+        })));
+        setGeocodeStatus('candidates');
+      } else {
+        const res = await api.searchAddress(target.trim());
+        setGeocodeMatches(res.matches || []);
+        setGeocodeStatus(res.status);
+      }
     } catch {
-      setGeocodeStatus('service_unavailable');
+      try {
+        const res = await api.searchAddress(target.trim());
+        setGeocodeMatches(res.matches || []);
+        setGeocodeStatus(res.status);
+      } catch {
+        setGeocodeStatus('service_unavailable');
+      }
     } finally {
       setIsGeocoding(false);
     }
@@ -235,7 +279,7 @@ export const AIChatPage: React.FC = () => {
     }));
   };
 
-  // Submit finalized complaint to backend
+  // Submit finalized complaint to backend via Chatbot confirmation endpoint
   const handleFinalSubmit = async (finalDraft: ComplaintDraftState) => {
     setIsSubmittingFinal(true);
     try {
@@ -243,21 +287,50 @@ export const AIChatPage: React.FC = () => {
       const lon = confirmedLocationMatch?.longitude || finalDraft.longitude;
       const geoAddr = confirmedLocationMatch?.display_address || finalDraft.geocoded_address;
 
-      const created = await api.submitComplaint({
-        title: `${finalDraft.category || 'Civic'} Issue at ${finalDraft.location || 'Reported Location'}`,
-        description: finalDraft.description || 'Voice/Chat reported grievance',
-        category: finalDraft.category || 'OTHER',
-        subcategory: finalDraft.subcategory,
-        priority: finalDraft.priority || 'MEDIUM',
-        priority_reason: finalDraft.priority_reason,
-        location: finalDraft.location || finalDraft.landmark || 'Locality unassigned',
-        landmark: finalDraft.landmark,
-        duration: finalDraft.duration,
-        language: finalDraft.language || 'English',
-        latitude: lat,
-        longitude: lon,
-        geocoded_address: geoAddr
-      });
+      let created;
+      if (sessionId) {
+        try {
+          created = await api.confirmChatbotSubmission({
+            session_id: sessionId,
+            latitude: lat,
+            longitude: lon,
+            geocoded_address: geoAddr
+          });
+        } catch (chatErr) {
+          // Fallback to standard submission if session is not active or token was invalidated
+          created = await api.submitComplaint({
+            title: `${finalDraft.category || 'Civic'} Issue at ${finalDraft.location || 'Reported Location'}`,
+            description: finalDraft.description || 'Voice/Chat reported grievance',
+            category: finalDraft.category || 'OTHER',
+            subcategory: finalDraft.subcategory,
+            priority: finalDraft.priority || 'MEDIUM',
+            priority_reason: finalDraft.priority_reason,
+            location: finalDraft.location || finalDraft.landmark || 'Locality unassigned',
+            landmark: finalDraft.landmark,
+            duration: finalDraft.duration,
+            language: finalDraft.language || 'English',
+            latitude: lat,
+            longitude: lon,
+            geocoded_address: geoAddr
+          });
+        }
+      } else {
+        created = await api.submitComplaint({
+          title: `${finalDraft.category || 'Civic'} Issue at ${finalDraft.location || 'Reported Location'}`,
+          description: finalDraft.description || 'Voice/Chat reported grievance',
+          category: finalDraft.category || 'OTHER',
+          subcategory: finalDraft.subcategory,
+          priority: finalDraft.priority || 'MEDIUM',
+          priority_reason: finalDraft.priority_reason,
+          location: finalDraft.location || finalDraft.landmark || 'Locality unassigned',
+          landmark: finalDraft.landmark,
+          duration: finalDraft.duration,
+          language: finalDraft.language || 'English',
+          latitude: lat,
+          longitude: lon,
+          geocoded_address: geoAddr
+        });
+      }
 
       speechService.stopSpeaking();
       navigate(`/complaint-success?id=${encodeURIComponent(created.complaint_id)}`);

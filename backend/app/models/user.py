@@ -21,3 +21,19 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     complaints: Mapped[List[Complaint]] = relationship("Complaint", back_populates="citizen", cascade="all, delete-orphan")
+
+    @property
+    def mobile_number(self) -> Optional[str]:
+        return self.phone_number
+
+    @mobile_number.setter
+    def mobile_number(self, value: Optional[str]):
+        self.phone_number = value
+
+    @property
+    def password_hash(self) -> str:
+        return self.hashed_password
+
+    @password_hash.setter
+    def password_hash(self, value: str):
+        self.hashed_password = value

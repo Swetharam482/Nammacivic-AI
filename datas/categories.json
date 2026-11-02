@@ -1,0 +1,142 @@
+[
+  {
+    "category_code": "ROAD_DAMAGE",
+    "category": "Road Damage & Potholes",
+    "suggested_department": "Highways & Road Maintenance Department",
+    "keywords": "road, pothole, pit, crater, tar, asphalt, broken road, damaged, bump, pallam, kuzhi, salai, thar, பள்ளம், குழி, சாலை, பழுது",
+    "required_information": "location, duration, landmark"
+  },
+  {
+    "category_code": "STREETLIGHT",
+    "category": "Streetlight Failure",
+    "suggested_department": "Electrical & Lighting Department",
+    "keywords": "streetlight, street light, lamp, bulb, pole, dark, wire, night, eriyala, velicham, light, kambam, தெருவிளக்கு, மின்விளக்கு, எரியவில்லை, இருட்டு",
+    "required_information": "location, pole_number, landmark"
+  },
+  {
+    "category_code": "GARBAGE",
+    "category": "Garbage Accumulation",
+    "suggested_department": "Solid Waste Management Department",
+    "keywords": "garbage, trash, waste, bin, dump, dumper, plastic, smell, kuppai, kuppa, thottil, naatram, குப்பை, தொட்டி, துர்நாற்றம், அள்ளவில்லை",
+    "required_information": "location, duration, landmark"
+  },
+  {
+    "category_code": "DRAINAGE",
+    "category": "Drainage Blockage",
+    "suggested_department": "Stormwater Drainage Department",
+    "keywords": "drain, drainage, storm water, clogged, blocked, overflowing, rain water, adappu, kaalvai, vedi, வடிகால், சாக்கடை அடைப்பு, மழைநீர் வடிகால்",
+    "required_information": "location, landmark, duration"
+  },
+  {
+    "category_code": "SEWAGE",
+    "category": "Sewage Overflow",
+    "suggested_department": "Metro Water & Sewerage Board",
+    "keywords": "sewage, manhole, septic, dirty water, foul smell, black water, saakkadai, naatram, valiyuthu, கழிவுநீர், பாதாள சாக்கடை, நாற்றம், வெளியேறுகிறது",
+    "required_information": "location, duration, severity"
+  },
+  {
+    "category_code": "WATER_SHORTAGE",
+    "category": "Water Supply Shortage",
+    "suggested_department": "Water Supply Department",
+    "keywords": "drinking water, water supply, shortage, no water, low pressure, kudineer, thanni, varala, vara maattenguthu, குடிநீர், தண்ணீர் வரவில்லை, தட்டுப்பாடு",
+    "required_information": "location, duration, connection_type"
+  },
+  {
+    "category_code": "WATER_LEAK",
+    "category": "Drinking Water Pipeline Leakage",
+    "suggested_department": "Water Supply & Distribution Department",
+    "keywords": "pipeline, pipe leak, burst, clean water wasting, pump, thanni leak, kodi pipe, valiyuthu, குழாய் உடைப்பு, குடிநீர் வீணாகிறது, கசிவு",
+    "required_information": "location, landmark, severity"
+  },
+  {
+    "category_code": "PUBLIC_TOILET",
+    "category": "Public Toilet Maintenance",
+    "suggested_department": "Public Health Department",
+    "keywords": "public toilet, restroom, urinal, no water, dirty, unhygienic, washroom, toilet, kazhivarai, கழிப்பறை, சுகாதாரம் இல்லை, தண்ணீர் இல்லை",
+    "required_information": "location, landmark, facility_name"
+  },
+  {
+    "category_code": "MOSQUITO",
+    "category": "Mosquito Breeding & Fogging",
+    "suggested_department": "Public Health & Vector Control Department",
+    "keywords": "mosquito, larvae, dengue, fogging, malaria, biting, stagnant water, kosu, thollai, marundhu adikka, கொசுத் தொல்லை, டெங்கு, புகை மருந்து",
+    "required_information": "location, duration, water_stagnation"
+  },
+  {
+    "category_code": "STRAY_ANIMAL",
+    "category": "Stray Animal Menace",
+    "suggested_department": "Veterinary & Animal Welfare Department",
+    "keywords": "stray dog, dog bite, barking, cattle, cow, monkey, rabies, naai, maadu, thollai, தெரு நாய், கடி, மாடு தொல்லை, குரங்கு",
+    "required_information": "location, animal_type, aggressiveness"
+  },
+  {
+    "category_code": "ENCROACHMENT",
+    "category": "Illegal Encroachment",
+    "suggested_department": "Town Planning & Revenue Department",
+    "keywords": "encroachment, illegal shop, footpath blocked, road occupied, barrier, aakkiramippu, kadai, ஆக்கிரமிப்பு, நடைபாதை ஆக்கிரமிப்பு, பாதை மறிப்பு",
+    "required_information": "location, structure_type, landmark"
+  },
+  {
+    "category_code": "ILLEGAL_DUMPING",
+    "category": "Illegal Waste Dumping",
+    "suggested_department": "Enforcement & Waste Management Department",
+    "keywords": "illegal dumping, debris, construction waste, rubble, building waste, katta kadasina, thooki pottanga, கட்டடக் கழிவு, சட்டவிரோத கொட்டுதல்",
+    "required_information": "location, vehicle_number_if_known, landmark"
+  },
+  {
+    "category_code": "FLOODING",
+    "category": "Road & Area Flooding",
+    "suggested_department": "Disaster Management & Stormwater Department",
+    "keywords": "flooding, submerged, waterlogging, monsoon flood, marooned, vellam, thanni thengi, மூழ்கியுள்ளது, வெள்ளம், தண்ணீர் தேக்கம்",
+    "required_information": "location, water_depth, affected_residents"
+  },
+  {
+    "category_code": "PUBLIC_INFRA",
+    "category": "Damaged Public Infrastructure",
+    "suggested_department": "Public Works Department (PWD)",
+    "keywords": "bus stop, shelter, public bench, fence, railing, board, udayal, broken shelter, நிழற்குடை சேதம், பொது சொத்து பழுது, பேருந்து நிறுத்தம்",
+    "required_information": "location, asset_type, damage_level"
+  },
+  {
+    "category_code": "PARK",
+    "category": "Public Park Maintenance",
+    "suggested_department": "Parks & Playgrounds Department",
+    "keywords": "park, playground, swing, grass, bench, walking track, broken gate, poonga, விளையாடும் இடம், பூங்கா பராமரிப்பு, ஊஞ்சல் உடைப்பு",
+    "required_information": "location, park_name, damage_type"
+  },
+  {
+    "category_code": "TREE_HAZARD",
+    "category": "Dangerous Tree / Branch Hazard",
+    "suggested_department": "Horticulture & Disaster Management Department",
+    "keywords": "tree fallen, falling branch, dry tree, power line danger, maram, kilai, murinjuruchu, விழுந்த மரம், காய்ந்த கிளை, ஆபத்தான மரம்",
+    "required_information": "location, urgency, wire_contact"
+  },
+  {
+    "category_code": "FOOTPATH",
+    "category": "Damaged Footpath & Pavements",
+    "suggested_department": "Roads & Pedestrian Infrastructure Department",
+    "keywords": "footpath, pavement, pedestrian walkway, broken slabs, open trench, nadai paadhai, nadakka mudila, நடைபாதை சேதம், கல் உடைப்பு",
+    "required_information": "location, stretch, landmark"
+  },
+  {
+    "category_code": "PUBLIC_SAFETY",
+    "category": "Open Manhole & Electrical Hazard",
+    "suggested_department": "Public Safety & Power Distribution Board",
+    "keywords": "electric spark, open wire, hanging wire, open manhole, uncovered pit, aabathu, uyir aabathu, மின் கம்பி, திறந்த மேன்ஹோல், உயிருக்கு ஆபத்து",
+    "required_information": "location, hazard_type, landmark"
+  },
+  {
+    "category_code": "WATER_QUALITY",
+    "category": "Contaminated Water Supply",
+    "suggested_department": "Water Quality Monitoring Department",
+    "keywords": "dirty water, mud water, yellowish water, bad smell water, contaminated, saakkadai kalandhu, கலங்கலான தண்ணீர், துர்நாற்றம், கழிவுநீர் கலப்பு",
+    "required_information": "location, color_odor, health_effect"
+  },
+  {
+    "category_code": "OTHER_CIVIC",
+    "category": "Other Civic Grievance",
+    "suggested_department": "Municipal General Administration Department",
+    "keywords": "noise pollution, loudspeaker, streetlight pole rust, signboard missing, general issue, பொதுப் புகார், இதர குறைபாடு, பெயர் பலகை",
+    "required_information": "location, detailed_description"
+  }
+]

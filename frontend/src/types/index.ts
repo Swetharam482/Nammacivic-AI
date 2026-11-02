@@ -75,6 +75,7 @@ export interface Complaint {
   latitude?: number;
   longitude?: number;
   geocoded_address?: string;
+  address_verification_status?: string;
   created_at: string;
   updated_at: string;
   status_history: StatusHistory[];
@@ -164,4 +165,71 @@ export interface GeocodeResponse {
   message: string;
   status: string;
   from_cache: boolean;
+}
+
+export interface AddressCandidate {
+  display_address: string;
+  display_name?: string;
+  formatted_address?: string;
+  latitude: number;
+  longitude: number;
+  place_id?: any;
+  type?: string;
+  specificity?: string;
+  importance?: number;
+  city?: string;
+  district?: string;
+  state?: string;
+  postcode?: string;
+}
+
+export interface AddressVerifyResponse {
+  raw_address?: string;
+  query?: string;
+  landmark?: string;
+  status: 'VERIFIED' | 'MANUAL_CONFIRMED' | 'NEEDS_CONFIRMATION' | 'PARTIALLY_MATCHED' | 'NOT_FOUND' | 'AMBIGUOUS' | 'PROVIDER_UNAVAILABLE';
+  confidence_score?: number;
+  matched_address?: string;
+  latitude?: number;
+  longitude?: number;
+  candidates: AddressCandidate[];
+  best_match?: AddressCandidate;
+  default_center?: { lat: number; lng: number; zoom?: number };
+  fallback_level?: string;
+  message: string;
+  provider?: string;
+  attribution?: string;
+}
+
+export interface ReverseGeocodeResponse {
+  formatted_address: string;
+  display_address: string;
+  latitude: number;
+  longitude: number;
+  door_number?: string;
+  street?: string;
+  area?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  postcode?: string;
+  provider?: string;
+  attribution?: string;
+}
+
+export interface AddressSuggestionResponse {
+  query: string;
+  suggestions: AddressCandidate[];
+  message?: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_token?: string;
+  expires_in_minutes: number;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  success: boolean;
 }

@@ -27,11 +27,10 @@ router = APIRouter()
 def submit_complaint(
     complaint_in: ComplaintCreate,
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user_optional)
+    current_user: User = Depends(get_current_user)
 ):
-    citizen_id = current_user.id if current_user else None
-    citizen_name = complaint_in.citizen_name or (current_user.full_name if current_user else "Citizen")
-    citizen_phone = complaint_in.citizen_phone or (current_user.phone_number if current_user else None)
+    citizen_name = complaint_in.citizen_name or current_user.full_name
+    citizen_phone = complaint_in.citizen_phone or current_user.phone_number
 
     complaint_in.citizen_name = citizen_name
     complaint_in.citizen_phone = citizen_phone
@@ -39,7 +38,7 @@ def submit_complaint(
     complaint = complaint_service.create_complaint(
         db=db,
         complaint_in=complaint_in,
-        citizen_id=citizen_id
+        citizen_id=current_user.id
     )
 
     return complaint
@@ -53,16 +52,12 @@ def list_complaints(
     limit: int = Query(50, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user_optional)
+    current_user: User = Depends(get_current_user)
 ):
     query = db.query(Complaint)
 
-    if my_only:
-        if not current_user:
-            raise HTTPException(
-                status_code=http_status.HTTP_401_UNAUTHORIZED,
-                detail="Must be logged in to view your complaints."
-            )
+    # Ordinary citizens can only access their own complaints
+    if current_user.role not in ["OFFICER", "DEMO_ADMIN", "ADMIN"] or my_only:
         query = query.filter(Complaint.citizen_id == current_user.id)
 
     if category and category != "ALL":

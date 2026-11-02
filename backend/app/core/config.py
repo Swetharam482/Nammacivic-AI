@@ -46,7 +46,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
 
     # Geocoding Config
-    GEOCODING_PROVIDER: str = "nominatim"
+    GOOGLE_MAPS_API_KEY: str = os.getenv("GOOGLE_MAPS_API_KEY", "")
+    GEOCODING_PROVIDER: str = "google" if os.getenv("GOOGLE_MAPS_API_KEY") else "nominatim"
     NOMINATIM_BASE_URL: str = "https://nominatim.openstreetmap.org"
     NOMINATIM_USER_AGENT: str = "NammaCivicAI/1.0 (academic-civic-redressal-prototype; contact: student-demo@nammacivic.local)"
     GEOCODING_COUNTRY_CODE: str = "in"

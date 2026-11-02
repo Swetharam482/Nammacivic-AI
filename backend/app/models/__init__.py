@@ -6,6 +6,7 @@ from app.models.evidence import EvidenceFile
 from app.models.history import ComplaintStatusHistory
 from app.models.verification import ResolutionVerification
 from app.models.conversation import ConversationSession, ConversationMessage
+from app.models.password_reset import PasswordResetToken
 
 __all__ = [
     "Base",
@@ -17,4 +18,5 @@ __all__ = [
     "ResolutionVerification",
     "ConversationSession",
     "ConversationMessage",
+    "PasswordResetToken",
 ]

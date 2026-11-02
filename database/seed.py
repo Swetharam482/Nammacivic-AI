@@ -103,18 +103,25 @@ def seed_database():
             db.flush()
             print("Created demo citizen: citizen@example.com / Password123!")
 
-        officer_user = db.query(User).filter(User.email == "officer@example.com").first()
+        # Preconfigured Demo Officer (demo@gmail.com)
+        import os
+        demo_officer_pwd = os.getenv("DEMO_OFFICER_PASSWORD", "DemoOfficer@2026!")
+        officer_user = db.query(User).filter(User.email == "demo@gmail.com").first()
         if not officer_user:
             officer_user = User(
-                email="officer@example.com",
+                email="demo@gmail.com",
                 phone_number="+91 9876543211",
-                full_name="Er. Senthil Kumar (GCC Zone 8)",
-                hashed_password=get_password_hash("Password123!"),
+                full_name="Municipal Grievance Officer (GCC)",
+                hashed_password=get_password_hash(demo_officer_pwd),
                 role="OFFICER"
             )
             db.add(officer_user)
             db.flush()
-            print("Created demo officer: officer@example.com / Password123!")
+            print("Created preconfigured demo officer: demo@gmail.com (role: OFFICER)")
+        else:
+            # Ensure role is OFFICER
+            officer_user.role = "OFFICER"
+            db.flush()
 
         # 3. Seed Realistic Grievances
         sample_complaints = [

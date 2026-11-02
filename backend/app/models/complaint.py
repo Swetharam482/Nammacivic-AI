@@ -19,7 +19,7 @@ class Complaint(Base):
     complaint_id: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    category: Mapped[str] = mapped_column(String(50), index=True, nullable=False)  # ROAD, STREETLIGHT, etc.
+    category: Mapped[str] = mapped_column(String(50), index=True, nullable=False)  # ROAD_DAMAGE, STREETLIGHT, etc.
     subcategory: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     priority: Mapped[str] = mapped_column(String(20), default="MEDIUM", nullable=False)  # LOW, MEDIUM, HIGH, CRITICAL
@@ -41,6 +41,7 @@ class Complaint(Base):
     latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     geocoded_address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    address_verification_status: Mapped[str] = mapped_column(String(50), default="UNVERIFIED", nullable=False)
 
     # Citizen relation (optional if guest or registered)
     citizen_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
@@ -68,3 +69,27 @@ class Complaint(Base):
     evidence_files: Mapped[List[EvidenceFile]] = relationship("EvidenceFile", back_populates="complaint", cascade="all, delete-orphan")
     status_history: Mapped[List[ComplaintStatusHistory]] = relationship("ComplaintStatusHistory", back_populates="complaint", cascade="all, delete-orphan", order_by="ComplaintStatusHistory.created_at.asc()")
     verifications: Mapped[List[ResolutionVerification]] = relationship("ResolutionVerification", back_populates="complaint", cascade="all, delete-orphan", order_by="ResolutionVerification.verified_at.asc()")
+
+    @property
+    def user_id(self) -> Optional[int]:
+        return self.citizen_id
+
+    @user_id.setter
+    def user_id(self, val: Optional[int]):
+        self.citizen_id = val
+
+    @property
+    def address(self) -> str:
+        return self.location
+
+    @address.setter
+    def address(self, val: str):
+        self.location = val
+
+    @property
+    def verified_address(self) -> Optional[str]:
+        return self.geocoded_address
+
+    @verified_address.setter
+    def verified_address(self, val: Optional[str]):
+        self.geocoded_address = val

@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { HomePage } from './pages/HomePage';
 import { AIChatPage } from './pages/AIChatPage';
@@ -30,12 +31,40 @@ export const App: React.FC = () => {
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/chat" element={<AIChatPage />} />
-                <Route path="/report" element={<ReportComplaintPage />} />
+                <Route 
+                  path="/chat" 
+                  element={
+                    <ProtectedRoute message="Please sign in or register to report a grievance.">
+                      <AIChatPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/report" 
+                  element={
+                    <ProtectedRoute message="Please sign in or register to report a grievance.">
+                      <ReportComplaintPage />
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route path="/complaint-success" element={<ComplaintSuccessPage />} />
                 <Route path="/track" element={<TrackComplaintPage />} />
-                <Route path="/my-complaints" element={<MyComplaintsPage />} />
-                <Route path="/demo-authority" element={<DemoAuthorityPage />} />
+                <Route 
+                  path="/my-complaints" 
+                  element={
+                    <ProtectedRoute message="Please sign in or register to view your submitted complaints.">
+                      <MyComplaintsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/demo-authority" 
+                  element={
+                    <ProtectedRoute requiredRole={['OFFICER', 'DEMO_ADMIN', 'ADMIN']} message="Only authorized municipal officers can access this dashboard.">
+                      <DemoAuthorityPage />
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/how-to-use" element={<HowToUsePage />} />
                 <Route path="/about" element={<AboutPage />} />

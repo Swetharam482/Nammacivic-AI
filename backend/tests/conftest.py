@@ -1,6 +1,10 @@
+import os
 import sys
 from pathlib import Path
 import pytest
+
+os.environ["TESTING"] = "1"
+os.environ["AI_PROVIDER"] = "fallback"
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

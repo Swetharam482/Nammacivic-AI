@@ -190,19 +190,42 @@ export const TrackComplaintPage: React.FC = () => {
                   <span className="text-[11px] text-slate-500 block">Landmark: {complaint.landmark}</span>
                 )}
                 {complaint.latitude && complaint.longitude && (
-                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono">
-                      📍 {complaint.latitude.toFixed(4)}, {complaint.longitude.toFixed(4)}
-                    </span>
-                    <a
-                      href={`https://www.openstreetmap.org/?mlat=${complaint.latitude}&mlon=${complaint.longitude}#map=16/${complaint.latitude}/${complaint.longitude}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-civic-blue-600 hover:underline text-[10px] inline-flex items-center gap-0.5"
-                    >
-                      <span>OpenStreetMap</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
+                  <div className="mt-2 space-y-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono">
+                        📍 {complaint.latitude.toFixed(5)}, {complaint.longitude.toFixed(5)}
+                      </span>
+                      {complaint.address_verification_status && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          complaint.address_verification_status === 'VERIFIED'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : 'bg-blue-100 text-blue-800 border border-blue-200'
+                        }`}>
+                          {complaint.address_verification_status === 'VERIFIED' ? 'Verified Location' : 'Manually Confirmed'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] pt-0.5">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${complaint.latitude},${complaint.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-civic-blue-600 font-bold hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>Google Maps</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <span className="text-slate-300">•</span>
+                      <a
+                        href={`https://www.openstreetmap.org/?mlat=${complaint.latitude}&mlon=${complaint.longitude}#map=16/${complaint.latitude}/${complaint.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-slate-500 hover:text-slate-700 hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>OpenStreetMap</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>

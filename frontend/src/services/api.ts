@@ -5,10 +5,31 @@ import {
   Department, 
   User, 
   DuplicateCheckResponse,
-  GeocodeResponse
+  GeocodeResponse,
+  AddressVerifyResponse,
+  AddressSuggestionResponse,
+  ReverseGeocodeResponse,
+  ForgotPasswordResponse,
+  ResetPasswordResponse
 } from '../types';
 
 const API_BASE = '/api/v1';
+
+async function smartFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const fullPath = url.startsWith('/') ? url : `/${url}`;
+  try {
+    const res = await fetch(fullPath, init);
+    if ((res.status === 502 || res.status === 504) && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return await fetch(`http://127.0.0.1:8000${fullPath}`, init);
+    }
+    return res;
+  } catch (netErr) {
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return await fetch(`http://127.0.0.1:8000${fullPath}`, init);
+    }
+    throw netErr;
+  }
+}
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('nammacivic_token');
@@ -31,14 +52,23 @@ export const api = {
   },
 
   async login(data: { email: string; password: string }) {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch {
+      throw new Error('Cannot connect to backend server. Please verify FastAPI is running on port 8000.');
+    }
+
     if (!res.ok) {
+      if (res.status === 502 || res.status === 504) {
+        throw new Error('Backend server is not reachable on port 8000. Please start the backend.');
+      }
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || 'Invalid email or password');
+      throw new Error(err.detail || 'Incorrect password. Please try again.');
     }
     return res.json() as Promise<{ access_token: string; user: User }>;
   },
@@ -52,6 +82,32 @@ export const api = {
     if (!res.ok) {
       localStorage.removeItem('nammacivic_token');
       return null;
+    }
+    return res.json();
+  },
+
+  async forgotPassword(email: string): Promise<ForgotPasswordResponse> {
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to request password reset');
+    }
+    return res.json();
+  },
+
+  async resetPassword(data: { token: string; new_password: string }): Promise<ResetPasswordResponse> {
+    const res = await fetch(`${API_BASE}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to reset password');
     }
     return res.json();
   },
@@ -89,11 +145,73 @@ export const api = {
     }
   },
 
+  async verifyAddress(
+    params: string | {
+      address?: string;
+      landmark?: string;
+      door_number?: string;
+      street_name?: string;
+      area_locality?: string;
+      city_town?: string;
+      district?: string;
+      state?: string;
+      country?: string;
+    }, 
+    landmark?: string
+  ): Promise<AddressVerifyResponse> {
+    const payload = typeof params === 'string' 
+      ? { address: params, landmark }
+      : { ...params, landmark: params.landmark || landmark };
+
+    const res = await smartFetch(`${API_BASE}/address/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to verify address');
+    }
+    return res.json();
+  },
+
+  async reverseGeocode(latitude: number, longitude: number): Promise<ReverseGeocodeResponse> {
+    const res = await smartFetch(`${API_BASE}/address/reverse`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latitude, longitude })
+    });
+    if (!res.ok) {
+      return {
+        formatted_address: `Pinned Location (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`,
+        display_address: `Pinned Location (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`,
+        latitude,
+        longitude
+      };
+    }
+    return res.json();
+  },
+
+  async getAddressSuggestions(query: string): Promise<AddressSuggestionResponse> {
+    const res = await smartFetch(`${API_BASE}/address/suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    if (!res.ok) {
+      return { query, suggestions: [], message: 'Could not fetch suggestions' };
+    }
+    return res.json();
+  },
+
   // AI Chat
   async sendChatMessage(message: string, sessionId?: string, language: string = 'auto') {
     const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
       body: JSON.stringify({ message, session_id: sessionId, language })
     });
     if (!res.ok) {
@@ -117,6 +235,28 @@ export const api = {
     return res.json();
   },
 
+  async confirmChatbotSubmission(data: {
+    session_id: string;
+    latitude?: number;
+    longitude?: number;
+    geocoded_address?: string;
+    address_verification_status?: string;
+  }): Promise<Complaint> {
+    const res = await fetch(`${API_BASE}/chat/confirm-submission`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to confirm grievance submission');
+    }
+    return res.json();
+  },
+
   // Complaints
   async submitComplaint(data: {
     title?: string;
@@ -135,6 +275,7 @@ export const api = {
     latitude?: number;
     longitude?: number;
     geocoded_address?: string;
+    address_verification_status?: string;
   }): Promise<Complaint> {
     const res = await fetch(`${API_BASE}/grievances`, {
       method: 'POST',
@@ -264,6 +405,74 @@ export const api = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || 'Failed to update demo status');
+    }
+    return res.json();
+  },
+
+  // Municipal Officer Dashboard APIs
+  async listOfficerGrievances(params?: {
+    category?: string;
+    department_id?: number;
+    status?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ComplaintListItem[]> {
+    const url = new URL(`${window.location.origin}${API_BASE}/officer/grievances`);
+    if (params?.category) url.searchParams.set('category', params.category);
+    if (params?.department_id) url.searchParams.set('department_id', String(params.department_id));
+    if (params?.status) url.searchParams.set('status', params.status);
+    if (params?.search) url.searchParams.set('search', params.search);
+    if (params?.limit) url.searchParams.set('limit', String(params.limit));
+    if (params?.offset) url.searchParams.set('offset', String(params.offset));
+
+    const res = await fetch(url.toString(), {
+      headers: getAuthHeader()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to fetch officer grievances');
+    }
+    return res.json();
+  },
+
+  async getOfficerGrievance(complaintId: string): Promise<Complaint> {
+    const res = await fetch(`${API_BASE}/officer/grievances/${encodeURIComponent(complaintId)}`, {
+      headers: getAuthHeader()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Grievance '${complaintId}' not found`);
+    }
+    return res.json();
+  },
+
+  async getOfficerComplaintDetail(complaintId: string): Promise<Complaint> {
+    return this.getOfficerGrievance(complaintId);
+  },
+
+  async updateOfficerGrievanceStatus(
+    complaintId: string,
+    data: {
+      status: string;
+      department_id?: number;
+      assigned_officer?: string;
+      internal_notes?: string;
+      resolution_notes?: string;
+      note?: string;
+    }
+  ): Promise<Complaint> {
+    const res = await fetch(`${API_BASE}/officer/grievances/${encodeURIComponent(complaintId)}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to update grievance status');
     }
     return res.json();
   }
